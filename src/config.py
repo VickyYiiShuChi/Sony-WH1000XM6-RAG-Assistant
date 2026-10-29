@@ -27,7 +27,7 @@ CHUNK_OVERLAP = 100
 TOP_K = 4
 
 # Generation
-MAX_NEW_TOKENS = 700
+MAX_NEW_TOKENS = 1200
 
 # Create required directories
 DATA_DIR.mkdir(parents=True, exist_ok=True)
