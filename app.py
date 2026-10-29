@@ -40,7 +40,7 @@ except Exception:
 # 2. Page configuration
 # ==========================================
 st.set_page_config(
-    page_title="Meet Your SONY WH-1000XM6 Assistant",
+    page_title="Sony Noise Cancelling Headphones WH-1000XM6 Assistant",
     page_icon="🎧",
     layout="wide",
     initial_sidebar_state="collapsed",
@@ -127,14 +127,14 @@ st.markdown(
     }
 
     .welcome-title {
-        color: #40366F;
+        color: #C4B5FD;
         font-size: 1rem;
         font-weight: 750;
         margin-bottom: 0.35rem;
     }
-
+    
     .welcome-text {
-        color: #625B7D;
+        color: #D1C9E8;
         font-size: 0.87rem;
         line-height: 1.6;
     }
@@ -223,7 +223,7 @@ st.markdown(
 st.markdown(
     """
     <div class="hero">
-        <h1>🎧 Sony Noise Cancelling Headphones WH-1000XM6</h1>
+        <h1>🎧 Meet Your Sony WH-1000XM6 Assistant</h1>
         <p>Your headphones, your questions. Let's figure it out.</p>
         <div class="hero-line"></div>
     </div>
