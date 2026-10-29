@@ -210,8 +210,22 @@ if question:
     with st.chat_message("assistant"):
         try:
             with st.spinner("Retrieving relevant passages and generating an answer..."):
+                print(
+                    "[RAG DEBUG] Question received:",
+                    repr(question),
+                    flush=True,
+                )
                 pipeline = get_pipeline()
+                print(
+                    "[RAG DEBUG] Pipeline initialized.",
+                    flush=True,
+                )
                 result = pipeline.ask(question)
+                print(
+                    "[RAG DEBUG] Answer generated. "
+                    f"Length: {len(result.get('answer', ''))}",
+                    flush=True,
+                )
 
             answer = result["answer"]
             sources = []
