@@ -40,7 +40,7 @@ except Exception:
 # 2. Page configuration
 # ==========================================
 st.set_page_config(
-    page_title="Sony Noise Cancelling Headphones WH-1000XM6",
+    page_title="Meet Your SONY WH-1000XM6 Assistant",
     page_icon="🎧",
     layout="wide",
     initial_sidebar_state="collapsed",
@@ -122,7 +122,7 @@ st.markdown(
         border: 1px solid var(--accent-border);
         border-radius: 14px;
         padding: 1.2rem;
-        background: var(--accent-light);
+        background: #262130;
         margin: 0.4rem 0 1.2rem;
     }
 
