@@ -129,17 +129,17 @@ ANSWER FORMAT
         ]
 
         try:
+            print(
+                "[RAG DEBUG] Configured MAX_NEW_TOKENS:",
+                MAX_NEW_TOKENS,
+                flush=True,
+            )
+            
             response = self.client.chat.completions.create(
                 model=self.model_name,
                 messages=messages,
                 max_completion_tokens=MAX_NEW_TOKENS,
                 temperature=0,
-            )
-
-            print(
-                "[RAG DEBUG] Configured MAX_NEW_TOKENS:",
-                MAX_NEW_TOKENS,
-                flush=True,
             )
             print(
                 "Groq finish_reason:",
