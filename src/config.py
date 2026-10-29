@@ -1,13 +1,20 @@
+import os
 from pathlib import Path
 
 # Project root directory
 BASE_DIR = Path(__file__).resolve().parent.parent
-DATA_DIR = BASE_DIR / "data"
-CHROMA_DIR = BASE_DIR / "chroma_db"
 
-# Models
+# Use the writable runtime directory on Streamlit Cloud when configured.
+RUNTIME_DIR = Path(
+    os.getenv("SONY_RAG_RUNTIME_DIR", str(BASE_DIR))
+)
+
+DATA_DIR = RUNTIME_DIR / "data"
+CHROMA_DIR = RUNTIME_DIR / "chroma_db"
+
+# Embedding model
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
-LLM_MODEL = "Qwen/Qwen2.5-1.5B-Instruct"
+LLM_MODEL = "openai/gpt-oss-20b"
 
 # Chroma
 COLLECTION_NAME = "sony_manual"
