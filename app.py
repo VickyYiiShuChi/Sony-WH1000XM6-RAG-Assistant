@@ -1,152 +1,170 @@
 
-import os
-import sys
-import tempfile
-from pathlib import Path
-
-import streamlit as st
-
-
 # ==========================================
-# Project configuration
-# ==========================================
-PROJECT_DIR = Path(__file__).resolve().parent
-os.chdir(PROJECT_DIR)
-
-if str(PROJECT_DIR) not in sys.path:
-    sys.path.insert(0, str(PROJECT_DIR))
-
-RUNTIME_DIR = Path(tempfile.gettempdir()) / "sony_rag_assistant"
-CHROMA_DIR = RUNTIME_DIR / "chroma_db"
-
-RUNTIME_DIR.mkdir(parents=True, exist_ok=True)
-CHROMA_DIR.mkdir(parents=True, exist_ok=True)
-
-os.environ["SONY_RAG_RUNTIME_DIR"] = str(RUNTIME_DIR)
-
-DEFAULT_PDF = (
-    PROJECT_DIR / "data" / "Sony_WH1000XM6_UserManual.pdf"
-)
-
-try:
-    if "GROQ_API_KEY" in st.secrets:
-        os.environ["GROQ_API_KEY"] = st.secrets["GROQ_API_KEY"]
-except Exception:
-    pass
-
-
-# ==========================================
-# Page configuration
-# ==========================================
-st.set_page_config(
-    page_title="Sony WH-1000XM6 Assistant",
-    page_icon="🎧",
-    layout="wide",
-    initial_sidebar_state="collapsed",
-)
-
-
-# ==========================================
-# Custom CSS
+# Enhanced styling
 # ==========================================
 st.markdown(
     """
     <style>
+    .stApp {
+        background: #f7f7fb;
+    }
+
     .block-container {
-        max-width: 1250px;
-        padding-top: 1.5rem;
-        padding-bottom: 5rem;
-        padding-left: 1.5rem;
-        padding-right: 1.5rem;
+        max-width: 1500px;
+        padding: 1.5rem 2rem 5rem 1.5rem;
     }
 
     /* Header */
     .hero {
-        text-align: center;
-        padding-bottom: 1.5rem;
+        text-align: left;
+        padding: 1.3rem 1.5rem;
+        margin-bottom: 1.5rem;
+        background: linear-gradient(120deg, #ffffff, #f0edff);
+        border: 1px solid #e9e5fa;
+        border-radius: 18px;
+    }
+
+    .hero-tag {
+        display: inline-block;
+        color: #6d4aff;
+        background: #eee9ff;
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 0.78rem;
+        font-weight: 650;
+        margin-bottom: 0.7rem;
     }
 
     .hero h1 {
-        font-size: 2rem;
-        font-weight: 700;
-        letter-spacing: -0.6px;
-        margin-bottom: 0.35rem;
+        font-size: 2.15rem;
+        font-weight: 750;
+        letter-spacing: -0.8px;
+        margin: 0 0 0.4rem 0;
+        color: #242137;
     }
 
     .hero p {
-        color: #888888;
-        font-size: 0.95rem;
+        color: #77738a;
+        font-size: 0.98rem;
         margin: 0;
     }
 
-    /* Section headings */
-    .section-heading {
-        font-size: 1.05rem;
-        font-weight: 650;
-        margin-bottom: 0.3rem;
+    /* Main columns */
+    div[data-testid="stHorizontalBlock"] {
+        align-items: flex-start;
+        gap: 1.5rem;
     }
 
-    .helper-text {
-        color: #888888;
-        font-size: 0.85rem;
-        line-height: 1.5;
+    /* Left panel */
+    .side-panel {
+        padding: 1.2rem 1rem;
+        background: #ffffff;
+        border: 1px solid #e9e8f0;
+        border-radius: 16px;
         margin-bottom: 1rem;
     }
 
-    /* Suggested question buttons */
+    .side-title {
+        font-size: 1.08rem;
+        font-weight: 750;
+        color: #29263a;
+        margin-bottom: 0.35rem;
+    }
+
+    .side-description {
+        font-size: 0.86rem;
+        color: #858194;
+        line-height: 1.6;
+    }
+
+    .mini-label {
+        color: #7d6bc1;
+        font-size: 0.74rem;
+        font-weight: 750;
+        letter-spacing: 0.8px;
+        margin: 1.2rem 0 0.6rem 0;
+    }
+
+    /* Buttons */
     div[data-testid="stButton"] > button {
-        width: 100%;
-        min-height: 2.7rem;
-        border-radius: 8px;
+        border-radius: 10px;
+        min-height: 2.9rem;
         text-align: left;
         font-size: 0.87rem;
-        white-space: normal;
+        border: 1px solid #e8e6f0;
+        background: #ffffff;
+        color: #39354a;
+        transition: all 0.15s ease;
     }
 
-    /* Chat messages */
+    div[data-testid="stButton"] > button:hover {
+        border-color: #a99aff;
+        color: #6344df;
+        background: #f6f3ff;
+    }
+
+    /* Chat panel */
+    .chat-heading {
+        font-size: 1.15rem;
+        font-weight: 750;
+        color: #29263a;
+        margin-bottom: 0.2rem;
+    }
+
+    .chat-subheading {
+        color: #898596;
+        font-size: 0.85rem;
+        margin-bottom: 1rem;
+    }
+
     div[data-testid="stChatMessage"] {
-        border-radius: 10px;
-        padding: 0.75rem 0.9rem;
-        margin-bottom: 0.5rem;
+        border: 1px solid #eceaf3;
+        border-radius: 14px;
+        padding: 0.9rem 1rem;
+        margin-bottom: 0.7rem;
+        background: #ffffff;
     }
 
-    /* Source expander */
     div[data-testid="stExpander"] {
-        border-radius: 8px;
+        border: 1px solid #e8e5f2;
+        border-radius: 10px;
+        background: #ffffff;
     }
 
-    /* Align bottom input approximately with the right column */
+    /* Bottom chat input */
     div[data-testid="stBottom"] {
         width: 70% !important;
         left: 30% !important;
         right: 0 !important;
-        padding: 0.5rem 1.5rem 0.75rem 1rem !important;
+        padding: 0.6rem 2rem 0.8rem 1rem !important;
         box-sizing: border-box !important;
-        background: var(--background-color);
+        background: rgba(247, 247, 251, 0.96);
     }
 
     div[data-testid="stBottom"] div[data-testid="stChatInput"] {
         width: 100% !important;
         max-width: 100% !important;
         margin: 0 !important;
-        box-sizing: border-box !important;
     }
 
-    /* Mobile layout */
+    /* Responsive */
     @media (max-width: 800px) {
         .block-container {
-            padding-left: 1rem;
-            padding-right: 1rem;
+            padding: 1rem 0.8rem 5rem 0.8rem;
+        }
+
+        .hero {
+            padding: 1rem;
         }
 
         .hero h1 {
-            font-size: 1.6rem;
+            font-size: 1.65rem;
         }
 
         div[data-testid="stBottom"] {
             width: 100% !important;
             left: 0 !important;
-            padding: 0.5rem 1rem 0.75rem 1rem !important;
+            padding: 0.5rem 0.8rem !important;
         }
     }
     </style>
@@ -161,7 +179,8 @@ st.markdown(
 st.markdown(
     """
     <div class="hero">
-        <h1>🎧 Sony WH-1000XM6 Assistant</h1>
+        <div class="hero-tag">YOUR PERSONAL HEADPHONE ASSISTANT</div>
+        <h1>🎧 Meet Your Sony WH-1000XM6</h1>
         <p>Your headphones, your questions. Let's figure it out.</p>
     </div>
     """,
@@ -170,69 +189,13 @@ st.markdown(
 
 
 # ==========================================
-# Session state
+# Main layout
 # ==========================================
-if "messages" not in st.session_state:
-    st.session_state.messages = []
+left_col, right_col = st.columns(
+    [1, 2.25],
+    gap="large",
+)
 
-if "pending_question" not in st.session_state:
-    st.session_state.pending_question = None
-
-
-# ==========================================
-# Initialize RAG pipeline
-# ==========================================
-@st.cache_resource
-def get_ready_pipeline():
-    from src.rag_pipeline import RAGPipeline
-
-    pipeline = RAGPipeline()
-
-    # Initialize the collection before checking its size.
-    collection = pipeline.vector_store.create_collection(
-        reset=False
-    )
-    count = collection.count()
-
-    # Build the index only if the collection is empty.
-    if count == 0:
-        if not DEFAULT_PDF.is_file():
-            raise FileNotFoundError(
-                f"User manual not found: {DEFAULT_PDF}"
-            )
-
-        pipeline.build_index(str(DEFAULT_PDF))
-
-        collection = pipeline.vector_store.create_collection(
-            reset=False
-        )
-        count = collection.count()
-
-        if count == 0:
-            raise RuntimeError(
-                "Indexing completed, but no searchable chunks were stored."
-            )
-
-    return pipeline, count
-
-
-# ==========================================
-# Load knowledge base
-# ==========================================
-try:
-    with st.spinner("Getting everything ready..."):
-        pipeline, chunk_count = get_ready_pipeline()
-
-except Exception as exc:
-    st.error("The assistant couldn't start properly.")
-    st.caption(f"{type(exc).__name__}: {exc}")
-    st.info("Please check the deployment logs.")
-    st.stop()
-
-
-# ==========================================
-# Suggested questions
-# ==========================================
 example_questions = [
     "How do I turn on noise cancelling?",
     "How can I connect to two devices?",
@@ -240,49 +203,47 @@ example_questions = [
     "What should I do if my headphones won't connect?",
 ]
 
-
-# ==========================================
-# Main layout
-# Left: Suggested questions
-# Right: Chat
-# ==========================================
-left_col, right_col = st.columns(
-    [1, 2.3],
-    gap="large",
-)
-
-
-# ==========================================
-# Left column
-# ==========================================
+# Left panel
 with left_col:
     st.markdown(
-        '<div class="section-heading">Suggested questions</div>',
+        """
+        <div class="side-panel">
+            <div class="side-title">✨ What can I help with?</div>
+            <div class="side-description">
+                Explore your headphones' features, settings,
+                connectivity and troubleshooting.
+            </div>
+            <div class="mini-label">QUICK START</div>
+        </div>
+        """,
         unsafe_allow_html=True,
     )
 
-    st.markdown(
-        '<div class="helper-text">Choose a question to get started.</div>',
-        unsafe_allow_html=True,
-    )
-
-    for i, example in enumerate(example_questions):
+    for i, question_text in enumerate(example_questions):
         if st.button(
-            example,
+            question_text,
             key=f"example_{i}",
             use_container_width=True,
         ):
-            st.session_state.pending_question = example
+            st.session_state.pending_question = question_text
             st.rerun()
 
-    st.divider()
-
-    st.caption(
-        "Answers are based on the official Sony user manual."
+    st.markdown(
+        """
+        <div class="side-panel" style="margin-top: 1rem;">
+            <div class="side-title">📖 Official manual</div>
+            <div class="side-description">
+                Answers are based on the Sony WH-1000XM6
+                user manual. Open the source references to
+                check the relevant PDF pages.
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
     )
 
     if st.button(
-        "Clear conversation",
+        "🗑️ Clear conversation",
         key="clear_conversation",
         use_container_width=True,
     ):
@@ -291,15 +252,24 @@ with left_col:
         st.rerun()
 
 
-# ==========================================
-# Right column: Chat history
-# ==========================================
+# Right panel
 with right_col:
-    st.markdown("#### Chat")
+    st.markdown(
+        '<div class="chat-heading">💬 Conversation</div>',
+        unsafe_allow_html=True,
+    )
+
+    st.markdown(
+        '<div class="chat-subheading">'
+        'Ask a question and get guidance from the official manual.'
+        '</div>',
+        unsafe_allow_html=True,
+    )
 
     if not st.session_state.messages:
-        st.caption(
-            "Your conversation will appear here."
+        st.info(
+            "👋 Welcome! Select a question on the left "
+            "or type your own question below to get started."
         )
 
     for message in st.session_state.messages:
@@ -309,7 +279,7 @@ with right_col:
             sources = message.get("sources", [])
 
             if message["role"] == "assistant" and sources:
-                with st.expander("View sources"):
+                with st.expander("📚 View sources"):
                     for source in sources:
                         st.markdown(
                             f"- **{source['chapter']}** / "
@@ -317,89 +287,3 @@ with right_col:
                             f"(PDF pages {source['page_start']}-"
                             f"{source['page_end']})"
                         )
-
-
-# ==========================================
-# Bottom chat input
-# ==========================================
-# Requires a Streamlit version that supports st.bottom.
-with st.bottom:
-    typed_question = st.chat_input(
-        "Ask about your headphones..."
-    )
-
-
-# ==========================================
-# Process typed or suggested question
-# ==========================================
-question = typed_question
-
-if st.session_state.pending_question:
-    question = st.session_state.pending_question
-    st.session_state.pending_question = None
-
-
-if question:
-    # Save user question.
-    st.session_state.messages.append(
-        {
-            "role": "user",
-            "content": question,
-        }
-    )
-
-    try:
-        with st.spinner("Finding an answer..."):
-            result = pipeline.ask(question)
-
-        answer = result["answer"]
-        sources = []
-
-        for item in result.get("sources", []):
-            if isinstance(item, dict):
-                meta = item.get("metadata", item)
-            else:
-                meta = getattr(item, "metadata", {}) or {}
-
-            sources.append(
-                {
-                    "chapter": meta.get(
-                        "chapter", "Unknown chapter"
-                    ),
-                    "section": meta.get(
-                        "section", "Unknown section"
-                    ),
-                    "page_start": meta.get(
-                        "page_start", "?"
-                    ),
-                    "page_end": meta.get(
-                        "page_end", "?"
-                    ),
-                }
-            )
-
-        # Save assistant answer and source references.
-        st.session_state.messages.append(
-            {
-                "role": "assistant",
-                "content": answer,
-                "sources": sources,
-            }
-        )
-
-    except Exception as exc:
-        error_message = (
-            "Sorry, I couldn't answer that just now. "
-            f"({type(exc).__name__}: {exc})"
-        )
-
-        st.session_state.messages.append(
-            {
-                "role": "assistant",
-                "content": error_message,
-                "sources": [],
-            }
-        )
-
-    # Rerun to display the latest messages.
-    st.rerun()
