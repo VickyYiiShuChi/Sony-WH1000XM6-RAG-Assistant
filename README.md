@@ -110,7 +110,7 @@ The pipeline processes and indexes the manual before users ask questions. At que
 ## Project Structure
 
 ```text
-sony-rag-assistant/
+Sony-WH1000XM6-RAG-Assistant/
 ├── app.py
 ├── requirements.txt
 ├── README.md
@@ -149,8 +149,8 @@ sony-rag-assistant/
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/VickyYiiShuChi/sony-rag-assistant.git
-cd sony-rag-assistant
+git clone https://github.com/VickyYiiShuChi/Sony-WH1000XM6-RAG-Assistant.git
+cd Sony-WH1000XM6-RAG-Assistant
 ```
 
 ### 2. Create a Virtual Environment
