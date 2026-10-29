@@ -4,6 +4,14 @@ A structure-aware Retrieval-Augmented Generation (RAG) application that answers 
 
 Built with Python, Sentence Transformers, ChromaDB, Groq, and Streamlit, this project explores how document structure and semantic retrieval can help an LLM generate answers grounded in a specific knowledge source.
 
+## Project Motivation
+
+This project is not intended to outperform more advanced, general-purpose AI assistants. Instead, it was built as a hands-on learning project to better understand how Retrieval-Augmented Generation (RAG) works and how it can be applied to a specific knowledge source.
+
+By building the system from document processing to answer generation, I wanted to explore how document structure, chunking strategies, semantic retrieval, and retrieved context influence the quality and reliability of LLM-generated answers.
+
+The project focuses on understanding the underlying workflow, experimenting with different components, and learning how to build an AI application that provides answers grounded in a specific document, with source references for verification.
+
 ## Live Demo
 
 **Try the application:** [Meet Your Sony WH-1000XM6 Assistant](https://sony-rag-assistant-4ejyz9d5tgqcwfnpazmwha.streamlit.app/)
@@ -106,7 +114,6 @@ sony-rag-assistant/
 ├── app.py
 ├── requirements.txt
 ├── README.md
-├── demo.ipynb
 ├── data/
 │   └── Sony_WH1000XM6_UserManual.pdf
 ├── screenshots/
@@ -128,7 +135,6 @@ sony-rag-assistant/
 - `data/`: Source user manual used as the knowledge base.
 - `screenshots/`: Screenshots of the website interface and example question-and-answer interaction.
 - `src/`: Core RAG components for document processing, structure-aware chunking, vector storage, semantic retrieval, and answer generation.
-- `demo.ipynb`: Jupyter Notebook for exploring the RAG pipeline.
 - `requirements.txt`: Python dependencies.
 
 ## Run Locally
