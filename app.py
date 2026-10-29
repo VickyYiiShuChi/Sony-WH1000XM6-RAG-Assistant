@@ -54,108 +54,106 @@ st.markdown(
     <style>
     :root {
         --accent: #7964D8;
-        --accent-light: #F1EEFF;
+        --accent-light: #F2EFFF;
+        --accent-border: #E5DEFF;
         --muted: #77758A;
         --border: #E8E6F0;
     }
 
-    /* Give the page more room on the left and right */
+    /* Reduce left and right page margins */
     .block-container {
-        max-width: 1550px;
-        padding-top: 1.4rem;
-        padding-bottom: 6rem;
-        padding-left: 2.2rem;
-        padding-right: 2.2rem;
+        max-width: 1600px;
+        padding-top: 1.3rem;
+        padding-bottom: 2rem;
+        padding-left: 0.8rem;
+        padding-right: 1.5rem;
     }
 
     /* Header */
     .hero {
         text-align: center;
-        padding: 0.5rem 0 2rem 0;
+        padding: 0.4rem 0 1.8rem 0;
     }
 
     .hero h1 {
-        font-size: 2.35rem;
+        font-size: 2.25rem;
         font-weight: 750;
-        letter-spacing: -0.9px;
-        margin-bottom: 0.45rem;
-        line-height: 1.25;
+        letter-spacing: -0.8px;
+        margin-bottom: 0.4rem;
     }
 
     .hero p {
-        font-size: 1rem;
         color: var(--muted);
+        font-size: 0.98rem;
         margin: 0;
     }
 
     .hero-line {
-        width: 54px;
+        width: 48px;
         height: 4px;
         border-radius: 10px;
         background: var(--accent);
-        margin: 1rem auto 0 auto;
+        margin: 0.9rem auto 0;
     }
 
-    /* Column headings */
+    /* Left panel */
     .eyebrow {
         color: var(--accent);
-        font-size: 0.75rem;
+        font-size: 0.74rem;
         font-weight: 750;
-        letter-spacing: 1.2px;
-        text-transform: uppercase;
+        letter-spacing: 1.1px;
         margin-bottom: 0.45rem;
     }
 
     .panel-title {
-        font-size: 1.25rem;
+        font-size: 1.2rem;
         font-weight: 750;
-        letter-spacing: -0.3px;
-        margin-bottom: 0.35rem;
+        line-height: 1.35;
+        margin-bottom: 0.4rem;
     }
 
     .panel-description {
         color: var(--muted);
-        font-size: 0.88rem;
+        font-size: 0.87rem;
         line-height: 1.6;
-        margin-bottom: 1.3rem;
+        margin-bottom: 1.2rem;
     }
 
-    /* Intro card */
     .intro-card {
         background: var(--accent-light);
-        border: 1px solid #E5DEFF;
-        border-radius: 15px;
-        padding: 1.1rem 1rem;
-        margin: 0.8rem 0 1.5rem 0;
+        border: 1px solid var(--accent-border);
+        border-radius: 14px;
+        padding: 1rem;
+        margin: 0.8rem 0 1.5rem;
     }
 
     .intro-icon {
-        font-size: 1.4rem;
-        margin-bottom: 0.5rem;
+        font-size: 1.5rem;
+        margin-bottom: 0.4rem;
     }
 
     .intro-title {
-        font-size: 0.95rem;
-        font-weight: 750;
         color: #40366F;
+        font-size: 0.94rem;
+        font-weight: 750;
         margin-bottom: 0.35rem;
     }
 
     .intro-text {
         color: #625B7D;
-        font-size: 0.82rem;
+        font-size: 0.83rem;
         line-height: 1.65;
     }
 
-    /* Suggested question buttons */
+    /* Buttons */
     div[data-testid="stButton"] > button {
+        min-height: 2.85rem;
         border-radius: 10px;
-        min-height: 2.9rem;
         text-align: left;
         white-space: normal;
-        font-size: 0.87rem;
         line-height: 1.4;
-        transition: border-color 0.15s ease;
+        font-size: 0.87rem;
+        padding: 0.6rem 0.8rem;
     }
 
     div[data-testid="stButton"] > button:hover {
@@ -163,56 +161,42 @@ st.markdown(
         color: var(--accent);
     }
 
-    /* Chat */
+    /* Chat messages */
     div[data-testid="stChatMessage"] {
-        border-radius: 13px;
+        border-radius: 12px;
         padding: 0.8rem 1rem;
-        margin-bottom: 0.7rem;
+        margin-bottom: 0.65rem;
     }
 
     div[data-testid="stExpander"] {
-        border: 1px solid var(--border);
         border-radius: 10px;
+        border-color: var(--border);
     }
 
-    /* Divider */
     hr {
         border-color: var(--border);
     }
 
-    /* Bottom chat input: visually align with the right column */
-    div[data-testid="stBottom"] {
-        width: 71% !important;
-        left: 29% !important;
-        right: 0 !important;
-        padding: 0.65rem 2.2rem 0.8rem 1rem !important;
-        box-sizing: border-box !important;
-        background: var(--background-color);
-        border-top: 1px solid var(--border);
+    /* Chat input is placed in the right column.
+       Do not use page-level fixed positioning here. */
+    div[data-testid="stChatInput"] {
+        width: 100%;
+        max-width: 100%;
     }
 
-    div[data-testid="stBottom"] div[data-testid="stChatInput"] {
-        width: 100% !important;
-        max-width: 100% !important;
-        margin: 0 !important;
-        box-sizing: border-box !important;
+    div[data-testid="stChatInput"] textarea {
+        border-radius: 12px;
     }
 
-    /* Small screen adjustments */
-    @media (max-width: 900px) {
+    /* Mobile */
+    @media (max-width: 800px) {
         .block-container {
             padding-left: 1rem;
             padding-right: 1rem;
         }
 
         .hero h1 {
-            font-size: 1.8rem;
-        }
-
-        div[data-testid="stBottom"] {
-            width: 100% !important;
-            left: 0 !important;
-            padding: 0.5rem 1rem 0.75rem 1rem !important;
+            font-size: 1.7rem;
         }
     }
     </style>
@@ -309,9 +293,9 @@ example_questions = [
 # ==========================================
 # 9. Main layout
 # ==========================================
-# Wider left panel, spacious chat panel
+# Left panel is compact; right panel has more room.
 left_col, right_col = st.columns(
-    [1, 2.35],
+    [0.95, 2.5],
     gap="large",
 )
 
@@ -333,8 +317,7 @@ with left_col:
     st.markdown(
         """
         <div class="panel-description">
-            Choose a question below, or type your own
-            question in the chat.
+            Find answers to common questions or choose a topic below.
         </div>
         """,
         unsafe_allow_html=True,
@@ -344,10 +327,10 @@ with left_col:
         """
         <div class="intro-card">
             <div class="intro-icon">🎧</div>
-            <div class="intro-title">Your personal headphone guide</div>
+            <div class="intro-title">Your headphone guide</div>
             <div class="intro-text">
-                Get help with settings, Bluetooth connections,
-                battery life, touch controls, and troubleshooting.
+                Get help with noise cancelling, Bluetooth,
+                battery life, touch controls and troubleshooting.
             </div>
         </div>
         """,
@@ -365,7 +348,7 @@ with left_col:
             st.session_state.pending_question = example
             st.rerun()
 
-    st.markdown("<div style='height: 0.6rem'></div>",
+    st.markdown("<div style='height: 0.5rem'></div>",
                 unsafe_allow_html=True)
 
     st.divider()
@@ -383,7 +366,7 @@ with left_col:
 
 
 # ==========================================
-# 11. Right panel: Chat
+# 11. Right panel: Chat history and input
 # ==========================================
 with right_col:
     st.markdown(
@@ -397,9 +380,11 @@ with right_col:
     )
 
     st.markdown(
-        '<div class="panel-description">'
-        'Ask a question and get an answer from the user manual.'
-        '</div>',
+        """
+        <div class="panel-description">
+            Ask a question about your Sony WH-1000XM6.
+        </div>
+        """,
         unsafe_allow_html=True,
     )
 
@@ -413,11 +398,11 @@ with right_col:
             )
 
             st.markdown(
-                "Select a suggested question on the left, "
-                "or ask me anything using the message box below."
+                "Choose a suggested question on the left, "
+                "or type your own question below."
             )
 
-    # Display conversation history
+    # Conversation history
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
@@ -434,18 +419,16 @@ with right_col:
                             f"{source['page_end']})"
                         )
 
-
-# ==========================================
-# 12. Bottom chat input
-# ==========================================
-with st.bottom:
+    # Input stays within the right column.
+    # It will appear below the chat history rather than being
+    # artificially shifted across the entire page.
     typed_question = st.chat_input(
         "Ask about your headphones..."
     )
 
 
 # ==========================================
-# 13. Process question
+# 12. Process typed or suggested question
 # ==========================================
 question = typed_question
 
