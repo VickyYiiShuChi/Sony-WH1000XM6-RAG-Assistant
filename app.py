@@ -188,9 +188,11 @@ st.markdown(
 def get_ready_pipeline():
     pipeline = RAGPipeline()
 
-    collection = pipeline.vector_store.collection
+    # Initialize the collection before checking its document count
+    collection = pipeline.vector_store.create_collection(reset=False)
     count = collection.count()
 
+    # Build the index only if the collection is empty
     if count == 0:
         if not DEFAULT_PDF.exists():
             raise FileNotFoundError(
@@ -199,7 +201,8 @@ def get_ready_pipeline():
 
         pipeline.build_index(str(DEFAULT_PDF))
 
-        collection = pipeline.vector_store.collection
+        # Refresh the collection after building the index
+        collection = pipeline.vector_store.create_collection(reset=False)
         count = collection.count()
 
     if count == 0:
