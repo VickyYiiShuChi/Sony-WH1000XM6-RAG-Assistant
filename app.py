@@ -1,4 +1,3 @@
-
 import os
 import sys
 import tempfile
@@ -15,45 +14,99 @@ os.chdir(PROJECT_DIR)
 if str(PROJECT_DIR) not in sys.path:
     sys.path.insert(0, str(PROJECT_DIR))
 
-# Store the ChromaDB index in a writable runtime directory.
-# Streamlit Cloud may clear this directory after a restart.
 RUNTIME_DIR = Path(tempfile.gettempdir()) / "sony_rag_assistant"
 CHROMA_DIR = RUNTIME_DIR / "chroma_db"
 
 RUNTIME_DIR.mkdir(parents=True, exist_ok=True)
 CHROMA_DIR.mkdir(parents=True, exist_ok=True)
 
-# Set this before importing project modules that read config.py.
 os.environ["SONY_RAG_RUNTIME_DIR"] = str(RUNTIME_DIR)
 
-# The manual is bundled with the project.
 DATA_DIR = PROJECT_DIR / "data"
 DEFAULT_PDF = DATA_DIR / "Sony_WH1000XM6_UserManual.pdf"
 
-# Load Groq API key from Streamlit Cloud Secrets.
 try:
     if "GROQ_API_KEY" in st.secrets:
         os.environ["GROQ_API_KEY"] = st.secrets["GROQ_API_KEY"]
 except Exception:
-    # Allows local development with an environment variable.
     pass
-
 
 # -----------------------------
 # Page configuration
 # -----------------------------
 st.set_page_config(
-    page_title="Sony WH-1000XM6 AI Assistant",
+    page_title="Sony WH-1000XM6 Assistant",
     page_icon="🎧",
     layout="wide",
 )
 
-st.title("🎧 Sony WH-1000XM6 AI Assistant")
-st.caption(
-    "Ask questions about your headphones using information "
-    "retrieved from the user manual."
+# -----------------------------
+# Custom styling
+# -----------------------------
+st.markdown(
+    """
+    <style>
+    .block-container {
+        padding-top: 2.5rem;
+        padding-bottom: 2rem;
+        max-width: 1400px;
+    }
+
+    .hero {
+        text-align: center;
+        padding: 1.5rem 0 2rem 0;
+    }
+
+    .hero h1 {
+        font-size: 2.7rem;
+        font-weight: 750;
+        letter-spacing: -1px;
+        margin-bottom: 0.5rem;
+    }
+
+    .hero p {
+        font-size: 1.1rem;
+        color: #888888;
+        margin-top: 0;
+    }
+
+    .section-heading {
+        font-size: 1.2rem;
+        font-weight: 650;
+        margin-bottom: 0.25rem;
+    }
+
+    .helper-text {
+        color: #888888;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+
+    div[data-testid="stChatMessage"] {
+        border-radius: 12px;
+    }
+
+    div.stButton > button {
+        border-radius: 10px;
+        min-height: 2.8rem;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
 )
 
+# -----------------------------
+# Header
+# -----------------------------
+st.markdown(
+    """
+    <div class="hero">
+        <h1>🎧 Meet Your Sony WH-1000XM6</h1>
+        <p>Your headphones, your questions. Let's figure it out.</p>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
 # -----------------------------
 # Session state
@@ -61,9 +114,11 @@ st.caption(
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
+if "pending_question" not in st.session_state:
+    st.session_state.pending_question = None
 
 # -----------------------------
-# Initialize the RAG pipeline
+# Initialize RAG pipeline
 # -----------------------------
 @st.cache_resource
 def get_ready_pipeline():
@@ -71,21 +126,17 @@ def get_ready_pipeline():
 
     pipeline = RAGPipeline()
 
-    # Check whether a searchable index already exists.
     collection = pipeline.vector_store.create_collection()
     count = collection.count()
 
     if count == 0:
-        # Build the index automatically when it is missing or empty.
         if not DEFAULT_PDF.is_file():
             raise FileNotFoundError(
-                "The default user manual was not found. "
-                f"Expected location: {DEFAULT_PDF}"
+                f"User manual not found: {DEFAULT_PDF}"
             )
 
         pipeline.build_index(str(DEFAULT_PDF))
 
-        # Verify that indexing produced searchable chunks.
         collection = pipeline.vector_store.create_collection()
         count = collection.count()
 
@@ -98,127 +149,91 @@ def get_ready_pipeline():
 
 
 # -----------------------------
-# Sidebar
-# -----------------------------
-with st.sidebar:
-    st.header("Knowledge Base")
-    st.caption("Sony WH-1000XM6 User Manual")
-
-    if DEFAULT_PDF.is_file():
-        st.success("User manual available.")
-        st.caption(DEFAULT_PDF.name)
-    else:
-        st.error("The bundled user manual PDF is missing.")
-
-    st.divider()
-    st.subheader("Index Status")
-
-
-# -----------------------------
-# Load the knowledge base
+# Load knowledge base
 # -----------------------------
 try:
-    with st.spinner(
-        "Preparing the knowledge base. "
-        "The first startup may take a few minutes..."
-    ):
+    with st.spinner("Getting everything ready..."):
         pipeline, chunk_count = get_ready_pipeline()
 
-    index_status = f"Ready: {chunk_count} chunks indexed."
-
-    with st.sidebar:
-        st.success(index_status)
-
 except Exception as exc:
-    pipeline = None
-    error_message = f"{type(exc).__name__}: {exc}"
-
-    with st.sidebar:
-        st.error("Knowledge base initialization failed.")
-        st.caption(error_message)
-
-    st.error(
-        "The assistant could not prepare its knowledge base. "
-        "Please check the deployment logs."
-    )
+    st.error("The assistant couldn't start properly.")
+    st.caption(f"{type(exc).__name__}: {exc}")
+    st.info("Please check the deployment logs.")
     st.stop()
 
 
 # -----------------------------
-# Display chat history
+# Main layout
 # -----------------------------
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
-
-        if message.get("sources"):
-            with st.expander("Retrieved sources"):
-                for source in message["sources"]:
-                    st.markdown(
-                        f"- **{source['chapter']}** / "
-                        f"{source['section']} "
-                        f"(PDF pages {source['page_start']}-"
-                        f"{source['page_end']})"
-                    )
-
-
-# -----------------------------
-# Chat input
-# -----------------------------
-question = st.chat_input(
-    "Ask a question about the Sony WH-1000XM6..."
+chat_col, examples_col = st.columns(
+    [2.4, 1],
+    gap="large",
 )
 
-if question:
-    st.session_state.messages.append({
-        "role": "user",
-        "content": question,
-    })
+# -----------------------------
+# Example questions panel
+# -----------------------------
+example_questions = [
+    "How do I turn on noise cancelling?",
+    "How can I connect to two devices?",
+    "How do I check the battery level?",
+    "What should I do if my headphones won't connect?",
+]
 
-    with st.chat_message("user"):
-        st.markdown(question)
+with examples_col:
+    st.markdown(
+        '<div class="section-heading">✨ Not sure where to start?</div>',
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        '<div class="helper-text">Try one of these questions.</div>',
+        unsafe_allow_html=True,
+    )
 
-    with st.chat_message("assistant"):
-        try:
-            with st.spinner(
-                "Retrieving relevant passages and generating an answer..."
-            ):
-                print(
-                    "[RAG DEBUG] Question received:",
-                    repr(question),
-                    flush=True,
-                )
+    for i, example in enumerate(example_questions):
+        if st.button(
+            example,
+            key=f"example_{i}",
+            use_container_width=True,
+        ):
+            st.session_state.pending_question = example
+            st.rerun()
 
-                result = pipeline.ask(question)
+    st.divider()
 
-                answer = result["answer"]
-                sources = []
+    st.caption("Sony WH-1000XM6")
 
-                for item in result.get("sources", []):
-                    meta = item.get("metadata", {})
+    st.caption(
+        "Ask about features, connectivity, controls, "
+        "charging, and troubleshooting."
+    )
 
-                    sources.append({
-                        "chapter": meta.get(
-                            "chapter", "Unknown chapter"
-                        ),
-                        "section": meta.get(
-                            "section", "Unknown section"
-                        ),
-                        "page_start": meta.get("page_start", "?"),
-                        "page_end": meta.get("page_end", "?"),
-                    })
+    if st.button("Clear conversation", use_container_width=True):
+        st.session_state.messages = []
+        st.session_state.pending_question = None
+        st.rerun()
 
-                print(
-                    "[RAG DEBUG] Answer generated. "
-                    f"Length: {len(answer)}",
-                    flush=True,
-                )
 
-            st.markdown(answer)
+# -----------------------------
+# Chat area
+# -----------------------------
+with chat_col:
+    st.markdown("#### 💬 Chat")
 
-            if sources:
-                with st.expander("Retrieved sources"):
-                    for source in sources:
+    if not st.session_state.messages:
+        st.markdown(
+            "Welcome! Ask me anything about your headphones, "
+            "or choose a suggested question on the right."
+        )
+
+    # Display conversation history
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
+
+            if message.get("sources"):
+                with st.expander("📚 View sources"):
+                    for source in message["sources"]:
                         st.markdown(
                             f"- **{source['chapter']}** / "
                             f"{source['section']} "
@@ -226,31 +241,88 @@ if question:
                             f"{source['page_end']})"
                         )
 
-            st.session_state.messages.append({
-                "role": "assistant",
-                "content": answer,
-                "sources": sources,
-            })
+    typed_question = st.chat_input(
+        "Ask about your headphones..."
+    )
 
-        except Exception as exc:
-            error_message = (
-                f"Unable to answer the question: "
-                f"{type(exc).__name__}: {exc}"
-            )
+    # Support both typed questions and example buttons
+    question = typed_question
 
-            st.error(error_message)
+    if st.session_state.pending_question:
+        question = st.session_state.pending_question
+        st.session_state.pending_question = None
 
-            st.session_state.messages.append({
-                "role": "assistant",
-                "content": error_message,
-                "sources": [],
-            })
+    if question:
+        st.session_state.messages.append(
+            {
+                "role": "user",
+                "content": question,
+            }
+        )
 
+        with st.chat_message("user"):
+            st.markdown(question)
 
-# -----------------------------
-# Clear chat
-# -----------------------------
-with st.sidebar:
-    if st.button("Clear Chat", use_container_width=True):
-        st.session_state.messages = []
-        st.rerun()
+        with st.chat_message("assistant"):
+            try:
+                with st.spinner("Finding an answer..."):
+                    result = pipeline.ask(question)
+
+                    answer = result["answer"]
+                    sources = []
+
+                    for item in result.get("sources", []):
+                        meta = item.get("metadata", {})
+
+                        sources.append(
+                            {
+                                "chapter": meta.get(
+                                    "chapter", "Unknown chapter"
+                                ),
+                                "section": meta.get(
+                                    "section", "Unknown section"
+                                ),
+                                "page_start": meta.get(
+                                    "page_start", "?"
+                                ),
+                                "page_end": meta.get(
+                                    "page_end", "?"
+                                ),
+                            }
+                        )
+
+                st.markdown(answer)
+
+                if sources:
+                    with st.expander("📚 View sources"):
+                        for source in sources:
+                            st.markdown(
+                                f"- **{source['chapter']}** / "
+                                f"{source['section']} "
+                                f"(PDF pages {source['page_start']}-"
+                                f"{source['page_end']})"
+                            )
+
+                st.session_state.messages.append(
+                    {
+                        "role": "assistant",
+                        "content": answer,
+                        "sources": sources,
+                    }
+                )
+
+            except Exception as exc:
+                error_message = (
+                    "Sorry, I couldn't answer that just now. "
+                    f"({type(exc).__name__}: {exc})"
+                )
+
+                st.error(error_message)
+
+                st.session_state.messages.append(
+                    {
+                        "role": "assistant",
+                        "content": error_message,
+                        "sources": [],
+                    }
+                )
