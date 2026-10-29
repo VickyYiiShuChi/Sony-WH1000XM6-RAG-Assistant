@@ -137,8 +137,14 @@ ANSWER FORMAT
             )
 
             print(
+                "[RAG DEBUG] Configured MAX_NEW_TOKENS:",
+                MAX_NEW_TOKENS,
+                flush=True,
+            )
+            print(
                 "Groq finish_reason:",
                 response.choices[0].finish_reason,
+                flush=True,
             )
             print("Groq usage:", response.usage)
 
