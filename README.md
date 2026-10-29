@@ -1,126 +1,104 @@
-# AI Knowledge Assistant: Structure-Aware RAG
+# Sony Noise Cancelling Headphones WH-1000XM6 Assistant
 
-A Retrieval-Augmented Generation (RAG) application that answers questions about the Sony WH-1000XM6 headphones using information retrieved from the official user manual.
+A structure-aware Retrieval-Augmented Generation (RAG) application that answers questions about the **Sony Noise Cancelling Headphones WH-1000XM6** using information retrieved from Sony's official online user manual.
 
 Built with Python, Sentence Transformers, ChromaDB, Groq, and Streamlit, this project explores how document structure and semantic retrieval can help an LLM generate answers grounded in a specific knowledge source.
 
 ## Live Demo
 
-**Try the application online:** [Sony RAG Assistant](YOUR_STREAMLIT_APP_URL)
+**Try the application:** [Sony WH-1000XM6 Assistant](YOUR_STREAMLIT_APP_URL)
 
-No local installation is required. Open the web app, enter a question about the Sony WH-1000XM6 headphones, and review the generated answer and its source references.
+No local installation is required. Open the web app, ask a question about the headphones, and review the generated answer and its source references.
 
-> The first request may take longer if the application needs to initialize its models or build the document index.
+> The first request may take longer while the application initializes its models or builds the document index.
 
 ## Screenshots
 
-The following screenshots demonstrate the application's interface and example outputs.
+### Full Website Interface
 
-<!-- Replace these paths with screenshots committed to the repository. -->
+![Full website interface](screenshots/website-interface.png)
 
-### Chat Interface
+The Streamlit application provides a chat interface with suggested questions to help users explore the headphones' features and troubleshooting instructions.
 
-![Sony RAG Assistant chat interface](screenshots/chat-interface.png)
+### Example Question and Answer
 
-The Streamlit interface allows users to ask questions about the headphones in natural language.
+![Example question and answer with source references](screenshots/question-and-answer.png)
 
-### Example: Answer with Source References
+Example of the assistant answering a user question using retrieved information from the official manual, with source references displayed when available.
 
-![Example RAG answer with source references](screenshots/answer-with-sources.png)
+## Official Knowledge Source
 
-The system retrieves relevant passages from the user manual and generates an answer with source metadata, such as section information and PDF page references, when available.
+This project uses the official online user manual published on Sony's website:
 
-### Retrieval and Document Processing
+**[Sony Noise Cancelling Headphones WH-1000XM6 Help Guide](https://helpguide.sony.net/mdr/2984/v1/en/index.html)**
 
-![Document processing and retrieval example](screenshots/retrieval-example.png)
-
-This example illustrates how document content is processed into chunks and retrieved based on semantic similarity.
-
-*Screenshots should show actual outputs from the application. Remove this section's image placeholders if the corresponding screenshots have not yet been added.*
-
-## Why I Built This Project
-
-General-purpose AI assistants can answer a wide range of questions, so building a manual-specific assistant is not intended to outperform them.
-
-Instead, this project is a practical learning exercise to understand how a RAG system works from end to end.
-
-The main objectives are to:
-
-- Understand how to extract and clean information from PDF documents.
-- Explore how document headings and section boundaries can improve text chunking.
-- Learn how semantic embeddings and vector databases support information retrieval.
-- Connect retrieved document context to an LLM for grounded answer generation.
-- Provide source references so users can verify answers against the original document.
-- Deploy an AI application as a usable web demo.
-
-The project also explores an important limitation of LLM applications: a fluent answer is not necessarily a correct answer. Retrieval quality, document processing, and source verification all matter.
+The manual serves as the knowledge source for document processing, semantic retrieval, and answer generation. Responses should be checked against the original manual, especially when the retrieved context does not fully support a question.
 
 ## Features
 
-- **PDF text extraction:** Extracts text from the user manual using PyMuPDF.
-- **Document cleaning:** Processes extracted text to reduce formatting noise.
-- **Structure detection:** Identifies document sections and headings using configurable heuristics.
+- **PDF text extraction:** Extracts manual content using PyMuPDF.
+- **Document cleaning:** Reduces formatting noise in extracted text.
+- **Structure detection:** Identifies document headings and sections using configurable heuristics.
 - **Section-aware chunking:** Splits content into chunks while considering document structure.
-- **Semantic embeddings:** Uses Sentence Transformers with `all-MiniLM-L6-v2` to represent text as vectors.
-- **Vector storage:** Stores document chunks and metadata in ChromaDB.
-- **Semantic retrieval:** Retrieves relevant passages for a user's question.
-- **LLM answer generation:** Uses the Groq API to generate answers from retrieved context.
-- **Source references:** Includes available chapter, section, and PDF page metadata.
-- **Interactive web interface:** Provides a Streamlit chat interface.
-- **Notebook demonstration:** Includes a Jupyter Notebook for inspecting the RAG pipeline.
+- **Semantic embeddings:** Uses Sentence Transformers with `all-MiniLM-L6-v2`.
+- **Vector storage and retrieval:** Stores document chunks and metadata in ChromaDB and retrieves relevant passages for user questions.
+- **LLM answer generation:** Uses the Groq API to generate answers based on retrieved context.
+- **Source references:** Displays available chapter, section, and PDF page metadata.
+- **Interactive web interface:** Provides a Streamlit chat experience.
+- **Notebook demonstration:** Includes a Jupyter Notebook for exploring the RAG pipeline.
 
 ## Architecture
 
 ```text
-Sony WH-1000XM6 User Manual (PDF)
-                |
-                v
-       PDF Text Extraction
-                |
-                v
-        Document Cleaning
-                |
-                v
-      Structure Detection
-                |
-                v
-      Section-Aware Chunking
-                |
-                v
-     Sentence Transformer
-      (all-MiniLM-L6-v2)
-                |
-                v
-          ChromaDB
-        Vector Store
-                |
-                v
-        Semantic Retrieval
-                |
-                v
-       Retrieved Context
-                |
-                v
-       Groq LLM Generation
-                |
-                v
-       Answer with Sources
+Sony Official User Manual
+          |
+          v
+   PDF Text Extraction
+          |
+          v
+    Document Cleaning
+          |
+          v
+   Structure Detection
+          |
+          v
+  Section-Aware Chunking
+          |
+          v
+ Sentence Transformers
+    all-MiniLM-L6-v2
+          |
+          v
+        ChromaDB
+      Vector Store
+          |
+          v
+  Semantic Retrieval
+          |
+          v
+   Retrieved Context
+          |
+          v
+    Groq LLM API
+          |
+          v
+ Answer with Sources
 ```
 
-The pipeline separates document preparation from question answering. The manual is processed into chunks and indexed, then relevant chunks are retrieved when a user submits a question.
+The pipeline processes and indexes the manual before users ask questions. At query time, it retrieves relevant text chunks and passes them to the LLM to generate a context-grounded answer.
 
 ## Tech Stack
 
 | Component | Technology | Purpose |
 |---|---|---|
-| Language | Python | Application and pipeline logic |
-| Web interface | Streamlit | Interactive chat interface |
+| Programming language | Python | Application and pipeline logic |
+| Web framework | Streamlit | Interactive user interface |
 | PDF processing | PyMuPDF | Text extraction |
 | Embeddings | Sentence Transformers | Semantic text representation |
-| Embedding model | `all-MiniLM-L6-v2` | Text embeddings |
-| Vector database | ChromaDB | Store and retrieve document chunks |
+| Embedding model | `all-MiniLM-L6-v2` | Generates text embeddings |
+| Vector database | ChromaDB | Stores and retrieves document chunks |
 | LLM API | Groq | Answer generation |
-| LLM model | `openai/gpt-oss-20b` | Language generation, as configured in the application |
+| LLM model | `openai/gpt-oss-20b` | Generates answers using retrieved context |
 
 ## Project Structure
 
@@ -144,36 +122,16 @@ sony-rag-assistant/
     └── rag_pipeline.py
 ```
 
-The `data/` directory contains the source document, while `src/` contains the document processing, indexing, retrieval, and generation components.
-
-The vector database may be created at runtime, depending on the application's configuration.
-
-## Try the Online Demo
-
-1. Open the [Live Demo](YOUR_STREAMLIT_APP_URL).
-2. Wait for the application to finish initializing.
-3. Enter a question about the Sony WH-1000XM6 headphones.
-4. Review the answer and its source references.
-5. Ask a follow-up question to explore another feature.
-
-Example questions:
-
-- How do I turn on noise cancelling?
-- How can I connect the headphones to two devices?
-- How do I charge the headphones?
-- What should I do if the headphones do not connect?
-- Can I use these headphones underwater?
-
-The final question is useful for checking whether the system handles questions that may not be supported by the manual. Its response should be checked against the retrieved evidence rather than assumed to be correct.
+The `src/` directory contains the document processing, chunking, embedding, retrieval, and generation components. The `data/` directory contains the source manual, while the vector index is created or accessed according to the application's runtime configuration.
 
 ## Run Locally
 
 ### Prerequisites
 
-- Python 3.10 or another Python version supported by the dependencies.
-- Git.
-- A Groq API key.
-- The Sony WH-1000XM6 user manual, subject to applicable distribution permissions.
+- Python 3.10 or a version supported by the project dependencies
+- Git
+- A Groq API key
+- The Sony official user manual, obtained from an authorized source
 
 ### 1. Clone the Repository
 
@@ -184,14 +142,14 @@ cd sony-rag-assistant
 
 ### 2. Create a Virtual Environment
 
-Windows:
+**Windows:**
 
 ```bash
 python -m venv .venv
 .venv\Scripts\activate
 ```
 
-macOS or Linux:
+**macOS / Linux:**
 
 ```bash
 python3 -m venv .venv
@@ -206,67 +164,64 @@ pip install -r requirements.txt
 
 ### 4. Configure the Groq API Key
 
-Set your API key as an environment variable.
-
-Windows PowerShell:
+**Windows PowerShell:**
 
 ```powershell
 $env:GROQ_API_KEY="your_groq_api_key"
 ```
 
-macOS or Linux:
+**macOS / Linux:**
 
 ```bash
 export GROQ_API_KEY="your_groq_api_key"
 ```
 
-Replace the placeholder with your own key. Do not commit API keys to GitHub.
+Replace the placeholder with your own API key. Do not commit API keys or other secrets to the repository.
 
-### 5. Prepare the Source Document
+### 5. Prepare the User Manual
 
-Ensure that the manual is available at the path expected by the application:
+Place the manual at the path expected by the application:
 
 ```text
 data/Sony_WH1000XM6_UserManual.pdf
 ```
 
-If you cannot redistribute the PDF, obtain it separately from an authorized source and place it in the expected location. Do not publish copyrighted documents without permission.
+If the PDF is not included in the repository, download or obtain it through an authorized source and place it in the expected location.
 
-### 6. Launch the Application
+### 6. Start the Application
 
 ```bash
 streamlit run app.py
 ```
 
-Open the local URL printed in the terminal, usually `http://localhost:8501`.
+Open the local URL shown in the terminal, usually `http://localhost:8501`.
 
-The application must be able to access the source document and initialize or access its vector index. First-time startup may take longer while models are downloaded or the index is built.
+The first startup may take longer while the embedding model is initialized and the document index is built.
 
 ## Limitations
 
-- **Heuristic structure detection:** Headings and section boundaries may not always be detected correctly.
-- **PDF format dependency:** Scanned or image-based documents may require OCR.
-- **Retrieval limitations:** Relevant information may not always be retrieved, especially for vague or complex questions.
-- **LLM limitations:** Generated answers may contain errors or unsupported statements.
-- **Source verification:** Users should verify important information against the original manual.
-- **PDF page numbering:** Referenced PDF page positions may differ from printed page numbers.
-- **Deployment constraints:** Initial loading time and availability depend on the hosting environment, model initialization, and external API services.
+- **Structure detection:** Heading and section detection relies on heuristics and may not always be accurate.
+- **Retrieval quality:** Relevant passages may be missed for vague or complex questions.
+- **LLM accuracy:** Generated answers may be incomplete or incorrect, even when they sound plausible.
+- **Source coverage:** Answers depend on the information available in the official manual and the passages retrieved.
+- **Page numbering:** PDF page references may differ from the printed page numbers in the manual.
+- **Deployment performance:** Startup time and availability depend on the hosting environment, model initialization, and external API services.
 
 ## Future Improvements
 
-- Evaluate retrieval quality using a set of representative questions and expected source passages.
+- Evaluate retrieval quality using representative questions and expected source passages.
 - Add automated tests for document processing, retrieval, and answer generation.
-- Improve retrieval with metadata filtering and configurable retrieval parameters.
-- Add clearer source previews and links to relevant manual pages.
+- Improve retrieval through metadata filtering and configurable search parameters.
+- Provide more detailed source previews and links to relevant manual sections.
 - Improve caching and startup performance.
 - Support additional documents and configurable knowledge sources.
 
 ## Learning Outcomes
 
-This project provided practical experience with document processing, semantic embeddings, vector databases, retrieval-augmented generation, LLM API integration, and deployment of an interactive AI application.
+This project provided hands-on experience with document processing, structure-aware chunking, semantic embeddings, vector databases, retrieval-augmented generation, LLM API integration, and deployment of an interactive AI application.
 
-The main takeaway is that building a useful RAG system involves more than connecting an LLM to a vector database. Document quality, chunking strategy, retrieval relevance, context construction, and answer verification all influence the final result.
+It also demonstrates that building a useful RAG system involves more than connecting an LLM to a vector database. Document quality, chunking strategy, retrieval relevance, context construction, and source verification all influence the quality of generated answers.
 
 ## Disclaimer
 
-This is an independent educational project and is not affiliated with or endorsed by Sony. The application is intended for demonstration and learning purposes. Consult the original user manual for authoritative product instructions.
+This is an independent educational project and is not affiliated with, endorsed by, or sponsored by Sony. The application uses Sony's official online user manual as its knowledge source. For authoritative product instructions, refer to the [official Sony Help Guide](https://helpguide.sony.net/mdr/2984/v1/en/index.html).
