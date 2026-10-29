@@ -211,7 +211,6 @@ The first startup may take longer while the embedding model is initialized and t
 - **Retrieval quality:** Relevant passages may be missed for vague or complex questions.
 - **LLM accuracy:** Generated answers may be incomplete or incorrect, even when they sound plausible.
 - **Source coverage:** Answers depend on the information available in the official manual and the passages retrieved.
-- **Page numbering:** PDF page references may differ from the printed page numbers in the manual.
 - **Deployment performance:** Startup time and availability depend on the hosting environment, model initialization, and external API services.
 
 ## Future Improvements
