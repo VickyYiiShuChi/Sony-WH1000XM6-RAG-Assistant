@@ -6,9 +6,9 @@ Built with Python, Sentence Transformers, ChromaDB, Groq, and Streamlit, this pr
 
 ## Live Demo
 
-**Try the application:** [Sony WH-1000XM6 Assistant](YOUR_STREAMLIT_APP_URL)
+**Try the application:** [Meet Your Sony WH-1000XM6 Assistant](https://sony-rag-assistant-4ejyz9d5tgqcwfnpazmwha.streamlit.app/)
 
-No local installation is required. Open the web app, ask a question about the headphones, and review the generated answer and its source references.
+No local installation is required. Open the web app, ask a question about the Sony Noise Cancelling Headphones WH-1000XM6, and review the generated answer and its source references.
 
 > The first request may take longer while the application initializes its models or builds the document index.
 
