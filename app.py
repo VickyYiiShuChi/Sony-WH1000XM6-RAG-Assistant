@@ -6,9 +6,10 @@ from pathlib import Path
 
 import streamlit as st
 
-# -----------------------------
+
+# ==========================================
 # Project configuration
-# -----------------------------
+# ==========================================
 PROJECT_DIR = Path(__file__).resolve().parent
 os.chdir(PROJECT_DIR)
 
@@ -34,9 +35,9 @@ except Exception:
     pass
 
 
-# -----------------------------
+# ==========================================
 # Page configuration
-# -----------------------------
+# ==========================================
 st.set_page_config(
     page_title="Sony WH-1000XM6 Assistant",
     page_icon="🎧",
@@ -45,98 +46,79 @@ st.set_page_config(
 )
 
 
-# -----------------------------
-# Custom styling
-# -----------------------------
+# ==========================================
+# Custom CSS
+# ==========================================
 st.markdown(
     """
     <style>
     .block-container {
-        max-width: 1450px;
-        padding-top: 2rem;
-        padding-bottom: 6rem;
+        max-width: 1250px;
+        padding-top: 1.5rem;
+        padding-bottom: 5rem;
         padding-left: 1.5rem;
         padding-right: 1.5rem;
     }
 
+    /* Header */
     .hero {
         text-align: center;
-        padding: 0.5rem 0 2rem 0;
+        padding-bottom: 1.5rem;
     }
 
     .hero h1 {
-        font-size: 2.5rem;
-        font-weight: 750;
-        letter-spacing: -0.8px;
-        margin-bottom: 0.45rem;
+        font-size: 2rem;
+        font-weight: 700;
+        letter-spacing: -0.6px;
+        margin-bottom: 0.35rem;
     }
 
     .hero p {
-        font-size: 1rem;
         color: #888888;
-        margin-top: 0;
+        font-size: 0.95rem;
+        margin: 0;
     }
 
+    /* Section headings */
     .section-heading {
-        font-size: 1.15rem;
-        font-weight: 700;
-        margin-bottom: 0.35rem;
+        font-size: 1.05rem;
+        font-weight: 650;
+        margin-bottom: 0.3rem;
     }
 
     .helper-text {
         color: #888888;
-        font-size: 0.88rem;
-        line-height: 1.6;
+        font-size: 0.85rem;
+        line-height: 1.5;
         margin-bottom: 1rem;
     }
 
-    .manual-card {
-        border: 1px solid #e8e7ee;
-        border-radius: 12px;
-        padding: 1rem;
-        margin: 1.2rem 0 1.5rem 0;
-        background: var(--secondary-background-color);
-    }
-
-    .manual-title {
-        font-size: 0.92rem;
-        font-weight: 700;
-        margin-bottom: 0.4rem;
-    }
-
-    .manual-description {
-        font-size: 0.83rem;
-        color: #888888;
-        line-height: 1.6;
-    }
-
-    div[data-testid="stHorizontalBlock"] {
-        align-items: flex-start;
-        gap: 2rem;
-    }
-
+    /* Suggested question buttons */
     div[data-testid="stButton"] > button {
-        border-radius: 10px;
-        min-height: 2.8rem;
-        font-size: 0.88rem;
+        width: 100%;
+        min-height: 2.7rem;
+        border-radius: 8px;
         text-align: left;
+        font-size: 0.87rem;
         white-space: normal;
     }
 
+    /* Chat messages */
     div[data-testid="stChatMessage"] {
-        border-radius: 12px;
-        padding: 0.75rem 0.9rem;
-        margin-bottom: 0.6rem;
-    }
-
-    div[data-testid="stExpander"] {
         border-radius: 10px;
+        padding: 0.75rem 0.9rem;
+        margin-bottom: 0.5rem;
     }
 
-    /* Keep the bottom input aligned with the right chat column */
+    /* Source expander */
+    div[data-testid="stExpander"] {
+        border-radius: 8px;
+    }
+
+    /* Align bottom input approximately with the right column */
     div[data-testid="stBottom"] {
-        width: 68% !important;
-        left: 32% !important;
+        width: 70% !important;
+        left: 30% !important;
         right: 0 !important;
         padding: 0.5rem 1.5rem 0.75rem 1rem !important;
         box-sizing: border-box !important;
@@ -150,14 +132,15 @@ st.markdown(
         box-sizing: border-box !important;
     }
 
-    @media (max-width: 900px) {
+    /* Mobile layout */
+    @media (max-width: 800px) {
         .block-container {
             padding-left: 1rem;
             padding-right: 1rem;
         }
 
         .hero h1 {
-            font-size: 1.8rem;
+            font-size: 1.6rem;
         }
 
         div[data-testid="stBottom"] {
@@ -172,13 +155,13 @@ st.markdown(
 )
 
 
-# -----------------------------
+# ==========================================
 # Header
-# -----------------------------
+# ==========================================
 st.markdown(
     """
     <div class="hero">
-        <h1>🎧 Meet Your Sony WH-1000XM6</h1>
+        <h1>🎧 Sony WH-1000XM6 Assistant</h1>
         <p>Your headphones, your questions. Let's figure it out.</p>
     </div>
     """,
@@ -186,9 +169,9 @@ st.markdown(
 )
 
 
-# -----------------------------
+# ==========================================
 # Session state
-# -----------------------------
+# ==========================================
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
@@ -196,20 +179,22 @@ if "pending_question" not in st.session_state:
     st.session_state.pending_question = None
 
 
-# -----------------------------
+# ==========================================
 # Initialize RAG pipeline
-# -----------------------------
+# ==========================================
 @st.cache_resource
 def get_ready_pipeline():
     from src.rag_pipeline import RAGPipeline
 
     pipeline = RAGPipeline()
 
+    # Initialize the collection before checking its size.
     collection = pipeline.vector_store.create_collection(
         reset=False
     )
     count = collection.count()
 
+    # Build the index only if the collection is empty.
     if count == 0:
         if not DEFAULT_PDF.is_file():
             raise FileNotFoundError(
@@ -231,9 +216,9 @@ def get_ready_pipeline():
     return pipeline, count
 
 
-# -----------------------------
+# ==========================================
 # Load knowledge base
-# -----------------------------
+# ==========================================
 try:
     with st.spinner("Getting everything ready..."):
         pipeline, chunk_count = get_ready_pipeline()
@@ -245,58 +230,41 @@ except Exception as exc:
     st.stop()
 
 
-# -----------------------------
+# ==========================================
+# Suggested questions
+# ==========================================
+example_questions = [
+    "How do I turn on noise cancelling?",
+    "How can I connect to two devices?",
+    "How do I check the battery level?",
+    "What should I do if my headphones won't connect?",
+]
+
+
+# ==========================================
 # Main layout
-# Left: examples
-# Right: chat
-# -----------------------------
-examples_col, chat_col = st.columns(
-    [1, 2.4],
+# Left: Suggested questions
+# Right: Chat
+# ==========================================
+left_col, right_col = st.columns(
+    [1, 2.3],
     gap="large",
 )
 
 
-# -----------------------------
-# Left panel
-# -----------------------------
-with examples_col:
+# ==========================================
+# Left column
+# ==========================================
+with left_col:
     st.markdown(
-        '<div class="section-heading">✨ Explore your headphones</div>',
+        '<div class="section-heading">Suggested questions</div>',
         unsafe_allow_html=True,
     )
 
     st.markdown(
-        """
-        <div class="helper-text">
-            Need help with a feature or setting?
-            Start with one of these common questions.
-        </div>
-        """,
+        '<div class="helper-text">Choose a question to get started.</div>',
         unsafe_allow_html=True,
     )
-
-    st.markdown(
-        """
-        <div class="manual-card">
-            <div class="manual-title">📘 Official user manual</div>
-            <div class="manual-description">
-                Answers are based on the Sony WH-1000XM6
-                official user manual. Check the source references
-                and PDF pages to verify the information.
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    st.markdown("**Suggested questions**")
-
-    example_questions = [
-        "How do I turn on noise cancelling?",
-        "How can I connect to two devices?",
-        "How do I check the battery level?",
-        "What should I do if my headphones won't connect?",
-    ]
 
     for i, example in enumerate(example_questions):
         if st.button(
@@ -309,15 +277,12 @@ with examples_col:
 
     st.divider()
 
-    st.caption("Sony WH-1000XM6")
-
     st.caption(
-        "Ask about features, connectivity, controls, "
-        "charging, and troubleshooting."
+        "Answers are based on the official Sony user manual."
     )
 
     if st.button(
-        "🗑️ Clear conversation",
+        "Clear conversation",
         key="clear_conversation",
         use_container_width=True,
     ):
@@ -326,18 +291,15 @@ with examples_col:
         st.rerun()
 
 
-# -----------------------------
-# Right panel: chat history
-# -----------------------------
-with chat_col:
-    st.markdown("#### 💬 Chat")
+# ==========================================
+# Right column: Chat history
+# ==========================================
+with right_col:
+    st.markdown("#### Chat")
 
     if not st.session_state.messages:
-        st.markdown(
-            """
-            Welcome! Ask me anything about your headphones.
-            You can also choose a suggested question on the left.
-            """
+        st.caption(
+            "Your conversation will appear here."
         )
 
     for message in st.session_state.messages:
@@ -347,36 +309,29 @@ with chat_col:
             sources = message.get("sources", [])
 
             if message["role"] == "assistant" and sources:
-                with st.expander("📚 View sources"):
+                with st.expander("View sources"):
                     for source in sources:
-                        chapter = source.get(
-                            "chapter", "Unknown chapter"
-                        )
-                        section = source.get(
-                            "section", "Unknown section"
-                        )
-                        page_start = source.get("page_start", "?")
-                        page_end = source.get("page_end", "?")
-
                         st.markdown(
-                            f"- **{chapter}** / {section} "
-                            f"(PDF pages {page_start}-{page_end})"
+                            f"- **{source['chapter']}** / "
+                            f"{source['section']} "
+                            f"(PDF pages {source['page_start']}-"
+                            f"{source['page_end']})"
                         )
 
 
-# -----------------------------
-# Chat input
-# -----------------------------
-# Page-level bottom input, visually aligned with the right column.
+# ==========================================
+# Bottom chat input
+# ==========================================
+# Requires a Streamlit version that supports st.bottom.
 with st.bottom:
     typed_question = st.chat_input(
         "Ask about your headphones..."
     )
 
 
-# -----------------------------
+# ==========================================
 # Process typed or suggested question
-# -----------------------------
+# ==========================================
 question = typed_question
 
 if st.session_state.pending_question:
@@ -385,6 +340,7 @@ if st.session_state.pending_question:
 
 
 if question:
+    # Save user question.
     st.session_state.messages.append(
         {
             "role": "user",
@@ -393,7 +349,8 @@ if question:
     )
 
     try:
-        result = pipeline.ask(question)
+        with st.spinner("Finding an answer..."):
+            result = pipeline.ask(question)
 
         answer = result["answer"]
         sources = []
@@ -412,11 +369,16 @@ if question:
                     "section": meta.get(
                         "section", "Unknown section"
                     ),
-                    "page_start": meta.get("page_start", "?"),
-                    "page_end": meta.get("page_end", "?"),
+                    "page_start": meta.get(
+                        "page_start", "?"
+                    ),
+                    "page_end": meta.get(
+                        "page_end", "?"
+                    ),
                 }
             )
 
+        # Save assistant answer and source references.
         st.session_state.messages.append(
             {
                 "role": "assistant",
@@ -439,4 +401,5 @@ if question:
             }
         )
 
+    # Rerun to display the latest messages.
     st.rerun()
