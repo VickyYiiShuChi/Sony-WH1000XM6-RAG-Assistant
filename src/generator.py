@@ -136,6 +136,12 @@ ANSWER FORMAT
                 temperature=0,
             )
 
+            print(
+                "Groq finish_reason:",
+                response.choices[0].finish_reason,
+            )
+            print("Groq usage:", response.usage)
+
             answer = (
                 response.choices[0].message.content or ""
             ).strip()
