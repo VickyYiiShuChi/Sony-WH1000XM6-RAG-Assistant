@@ -45,7 +45,6 @@ The manual serves as the knowledge source for document processing, semantic retr
 - **LLM answer generation:** Uses the Groq API to generate answers based on retrieved context.
 - **Source references:** Displays available chapter, section, and PDF page metadata.
 - **Interactive web interface:** Provides a Streamlit chat experience.
-- **Notebook demonstration:** Includes a Jupyter Notebook for exploring the RAG pipeline.
 
 ## Architecture
 
@@ -110,6 +109,9 @@ sony-rag-assistant/
 ├── demo.ipynb
 ├── data/
 │   └── Sony_WH1000XM6_UserManual.pdf
+├── screenshots/
+│   ├── website-interface.png
+│   └── question-and-answer.png
 └── src/
     ├── config.py
     ├── document_parser.py
@@ -122,7 +124,12 @@ sony-rag-assistant/
     └── rag_pipeline.py
 ```
 
-The `src/` directory contains the document processing, chunking, embedding, retrieval, and generation components. The `data/` directory contains the source manual, while the vector index is created or accessed according to the application's runtime configuration.
+- `app.py`: Streamlit web application and chat interface.
+- `data/`: Source user manual used as the knowledge base.
+- `screenshots/`: Screenshots of the website interface and example question-and-answer interaction.
+- `src/`: Core RAG components for document processing, structure-aware chunking, vector storage, semantic retrieval, and answer generation.
+- `demo.ipynb`: Jupyter Notebook for exploring the RAG pipeline.
+- `requirements.txt`: Python dependencies.
 
 ## Run Locally
 
