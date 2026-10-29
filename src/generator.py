@@ -139,6 +139,8 @@ ANSWER FORMAT
                 model=self.model_name,
                 messages=messages,
                 max_completion_tokens=MAX_NEW_TOKENS,
+                reasoning_effort="low",
+                include_reasoning=False,
                 temperature=0,
             )
             print(
