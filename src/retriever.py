@@ -1,4 +1,3 @@
-
 from src.config import TOP_K
 
 
@@ -9,7 +8,6 @@ class Retriever:
     @staticmethod
     def _get_metadata_text(item):
         metadata = item.get("metadata", {})
-
         return (
             f"{metadata.get('chapter', '')} "
             f"{metadata.get('section', '')}"
@@ -19,7 +17,6 @@ class Retriever:
     def _classify_question(question):
         q = question.lower()
 
-        # Check specific operations before general keywords.
         if (
             "factory reset" in q
             or "factory settings" in q
@@ -36,17 +33,30 @@ class Retriever:
             return "le_audio"
 
         if (
+            "iphone" in q
+            or "ios" in q
+            or "apple" in q
+        ):
+            return "ios_pairing"
+
+        if (
+            "android" in q
+            or "samsung" in q
+        ):
+            return "android_pairing"
+
+        if (
             "pair" in q
             or "pairing" in q
             or "connect" in q
             or "connecting" in q
         ):
-            if "android" in q:
-                return "android_pairing"
+            return "general"
 
         if (
             "noise canceling" in q
             or "noise cancelling" in q
+            or "noise cancellation" in q
             or "ambient sound" in q
             or "nc/amb" in q
         ):
@@ -56,7 +66,7 @@ class Retriever:
             "how many devices" in q
             or "number of devices" in q
             or "maximum devices" in q
-            or "how many" in q and "device" in q
+            or ("how many" in q and "device" in q)
         ):
             return "paired_device_limit"
 
@@ -91,19 +101,31 @@ class Retriever:
                 score += 4.0
             if "le audio" in section:
                 score -= 8.0
-
             if "pairing and connecting" in section:
                 score += 2.0
+
+        elif intent == "ios_pairing":
+            if "iphone" in section or "ios" in section:
+                score += 5.0
+            if "apple devices" in section:
+                score += 4.0
+            if "pairing and connecting" in section:
+                score += 2.0
+            if "le audio" in section:
+                score -= 8.0
 
         elif intent == "le_audio":
             if "le audio" in section:
                 score += 6.0
 
         elif intent == "noise_canceling":
-            if "using noise canceling function" in section:
-                score += 4.0
+            if (
+                "using the noise canceling function" in section
+                or "using noise canceling function" in section
+            ):
+                score += 6.0
             if "ambient sound" in section:
-                score += 3.0
+                score -= 2.0
 
         elif intent == "paired_device_limit":
             if "pairing" in section or "connecting" in section:
@@ -118,7 +140,6 @@ class Retriever:
         return score
 
     def retrieve(self, question, top_k=TOP_K, chapter=None):
-        # Retrieve extra candidates before reranking.
         candidate_count = max(top_k * 4, 12)
 
         candidates = self.vector_store.search(
@@ -132,14 +153,10 @@ class Retriever:
 
         intent = self._classify_question(question)
 
-        # Preserve semantic relevance while using section information
-        # to distinguish similar procedures.
         for item in candidates:
-            distance = item.get("distance", 1.0)
-
+            distance = float(item.get("distance", 1.0))
             item["_rerank_score"] = (
-                -float(distance)
-                + self._section_score(item, intent)
+                -distance + self._section_score(item, intent)
             )
 
         candidates.sort(
@@ -147,22 +164,40 @@ class Retriever:
             reverse=True,
         )
 
-        # For ordinary Android pairing, do not return LE Audio
-        # sections when enough ordinary pairing results exist.
         if intent == "android_pairing":
-            ordinary_candidates = [
-                item
-                for item in candidates
+            ordinary = [
+                item for item in candidates
                 if "le audio" not in self._get_metadata_text(item)
             ]
+            if ordinary:
+                candidates = ordinary
 
-            if ordinary_candidates:
-                candidates = ordinary_candidates
+        # Remove exact duplicate chunks and repeated section/page entries.
+        results = []
+        seen_text = set()
+        seen_location = set()
 
-        # Remove internal reranking scores from returned results.
-        results = candidates[:top_k]
+        for item in candidates:
+            text = " ".join(item.get("text", "").lower().split())
+            metadata = item.get("metadata", {})
 
-        for item in results:
-            item.pop("_rerank_score", None)
+            location = (
+                str(metadata.get("section", "")).strip().lower(),
+                metadata.get("page_start"),
+                metadata.get("page_end"),
+            )
+
+            if text in seen_text or location in seen_location:
+                continue
+
+            seen_text.add(text)
+            seen_location.add(location)
+
+            cleaned = dict(item)
+            cleaned.pop("_rerank_score", None)
+            results.append(cleaned)
+
+            if len(results) >= top_k:
+                break
 
         return results
